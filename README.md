@@ -66,6 +66,15 @@ docker exec -it kafka kafka-console-consumer \
   --bootstrap-server localhost:9092 --topic borrows --from-beginning
 ```
 
+## How it fits together
+
+![one announcement, two reactions](pubsub-overview.png)
+
+The diagram is made by `docs/make_pubsub_diagram.py`. Change that script if you
+change the sample, then run `python docs/make_pubsub_diagram.py .` and copy the
+PNG to the student repository. You need Python with Pillow
+(`pip install pillow`).
+
 ## The answer, in short
 
 ```java
