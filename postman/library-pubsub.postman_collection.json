@@ -1,0 +1,181 @@
+{
+  "info": {
+    "name": "Library PubSub (MFU)",
+    "description": "Import this into Postman to try the event-driven library by hand.\n\nStart the broker first (docker compose up), then the three services.\n\nThe requests are in the order of the steps in TODO.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "borrowService",
+      "value": "http://localhost:8200",
+      "type": "string"
+    },
+    {
+      "key": "notificationService",
+      "value": "http://localhost:8201",
+      "type": "string"
+    },
+    {
+      "key": "popularityService",
+      "value": "http://localhost:8202",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Publish events (the producer)",
+      "item": [
+        {
+          "name": "Borrow 1984 (Alice)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"answers 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bookTitle\": \"1984\",\n    \"memberName\": \"Alice Johnson\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{borrowService}}/borrows",
+              "host": ["{{borrowService}}"],
+              "path": ["borrows"]
+            },
+            "description": "THE request of the whole session.\n\nNotice what the 201 does NOT tell you: whether anybody read the event. The producer cannot know, and does not need to. Send this while the subscribers are STOPPED (step 4) and it still answers 201.\n\nAfter step 1, every send also appears in the console-consumer window."
+          },
+          "response": []
+        },
+        {
+          "name": "Borrow The Hobbit (Bob)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"answers 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"bookTitle\": \"The Hobbit\",\n    \"memberName\": \"Bob Smith\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{borrowService}}/borrows",
+              "host": ["{{borrowService}}"],
+              "path": ["borrows"]
+            },
+            "description": "A second borrow, different book and member. Send the 1984 request several times and this one once, then look at the popularity page: 1984 climbs, The Hobbit stays at 1."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. The subscribers react",
+      "item": [
+        {
+          "name": "List notifications",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"answers 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"step 2: the event became a notification\", function () {",
+                  "    const bodies = pm.response.json().map(n => n.bookTitle);",
+                  "    pm.expect(bodies).to.include(\"1984\");",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{notificationService}}/notifications",
+              "host": ["{{notificationService}}"],
+              "path": ["notifications"]
+            },
+            "description": "One row per borrow event. The producer never called this service - the broker delivered the event to its @KafkaListener.\n\nEasier to watch as the page: http://localhost:8201/"
+          },
+          "response": []
+        },
+        {
+          "name": "List book popularity",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"answers 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"step 3: the counts are derived from the events\", function () {",
+                  "    const row = pm.response.json().find(p => p.bookTitle === \"1984\");",
+                  "    pm.expect(row, \"no row for 1984 yet - post a borrow first\").to.not.be.undefined;",
+                  "    pm.expect(row.borrowCount).to.be.above(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{popularityService}}/popularity",
+              "host": ["{{popularityService}}"],
+              "path": ["popularity"]
+            },
+            "description": "One row per book, with a count. The SAME events as the notification list, reacted to differently - that is one announcement, two subscribers.\n\nNobody ever posts a count here. It is derived state: delete it, replay the events (step 5), and it comes back.\n\nEasier to watch as the page: http://localhost:8202/"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

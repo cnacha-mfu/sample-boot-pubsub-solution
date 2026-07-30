@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Notifications</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f5f5f5; text-align: left; }
+  </style>
+  <script>
+    async function load() {
+      const res = await fetch('/notifications');
+      const data = await res.json();
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = '';
+      data.forEach(n => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${n.id||''}</td><td>${n.memberName||''}</td><td>${n.bookTitle||''}</td><td>${n.message||''}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+    setInterval(load, 2000);
+    window.onload = load;
+  </script>
+</head>
+<body>
+  <h1>Notifications</h1>
+  <p>This page reloads the list every 2 seconds. Post a borrow and watch.</p>
+  <table>
+    <thead><tr><th>ID</th><th>Member</th><th>Book</th><th>Message</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</body>
+</html>

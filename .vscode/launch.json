@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "1. borrow-service (8200) - the producer",
+            "request": "launch",
+            "mainClass": "th.mfu.borrow.BorrowServiceApp",
+            "projectName": "library-borrow-service"
+        },
+        {
+            "type": "java",
+            "name": "2. notification-service (8201) - subscriber",
+            "request": "launch",
+            "mainClass": "th.mfu.notification.NotificationServiceApp",
+            "projectName": "library-notification-service"
+        },
+        {
+            "type": "java",
+            "name": "3. popularity-service (8202) - subscriber",
+            "request": "launch",
+            "mainClass": "th.mfu.popularity.PopularityServiceApp",
+            "projectName": "library-popularity-service"
+        }
+    ]
+}
