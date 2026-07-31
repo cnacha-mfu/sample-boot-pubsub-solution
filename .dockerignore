@@ -1,0 +1,4 @@
+# Keeps the docker build context small: the image builds the jar itself, so it
+# never needs local build output or git history.
+**/target
+.git
