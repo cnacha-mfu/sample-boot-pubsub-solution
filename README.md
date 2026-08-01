@@ -142,6 +142,16 @@ entry.setBorrowCount(entry.getBorrowCount() + 1);
    `memberId`? (They stay as they are — you handle both shapes. Events are
    never edited.) *(slide: challenges)*
 
+## The class challenge
+
+TODO.md ends with a challenge: a third listener, library-activity-service
+(8203), counting borrows per member with its own group id. There is no solution
+for it here on purpose - it is the popularity service with three names changed,
+and the point is the question at the end: zero lines of the producer change for
+a new subscriber. If a pair reuses popularity-group, let them run it - the two
+pages start missing alternate events, which is the best group-id demonstration
+there is.
+
 ## Mistakes students often make
 
 | What they do | What happens |
